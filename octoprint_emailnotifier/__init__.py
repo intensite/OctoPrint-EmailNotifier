@@ -2,7 +2,8 @@
 from __future__ import absolute_import
 import os
 import octoprint.plugin
-import yagmail
+#import yagmail
+import smtplib
 import flask
 import tempfile
 
@@ -143,7 +144,7 @@ class EmailNotifierPlugin(octoprint.plugin.EventHandlerPlugin,
 
 	# Helper function to reduce code duplication.
 	# If snapshot == True, a webcam snapshot will be appended to body before sending.
-	def send_notification(self, subject="OctoPrint notification", body=[""], snapshot=True):
+	def send_notification(self, subject="OctoPrint notification", body=[""], snapshot=False):
 
 		# If a snapshot is requested, let's grab it now.
 		if snapshot:
@@ -158,10 +159,12 @@ class EmailNotifierPlugin(octoprint.plugin.EventHandlerPlugin,
 					body.append(yagmail.inline(filename))
 
 		# Exceptions thrown by any of the following lines are intentionally not
-		# caught. The callers need to be able to handle them in different ways.
-		mailer = yagmail.SMTP(user={self._settings.get(['mail_username']):self._settings.get(['mail_useralias'])}, host=self._settings.get(['mail_server']))
+		# caught. The callers need to be able to handle them in different ways..
+		# mailer = yagmail.SMTP(user={self._settings.get(['mail_username']):self._settings.get(['mail_useralias'])}, host=self._settings.get(['mail_server']))
+		mailer = smtplib.SMTP(self._settings.get(['mail_server']), 25)
 		emails = [email.strip() for email in self._settings.get(['recipient_address']).split(',')]
-		mailer.send(to=emails, subject=subject, contents=body, validate_email=False)
+		#mailer.send(to=emails, subject=subject, contents=body, validate_email=False)
+		mailer.sendmail('stephenr70@gmail.com', emails, body)
 
 
 __plugin_name__ = "Email Notifier"
